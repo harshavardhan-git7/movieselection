@@ -1,0 +1,111 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix Clone</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/style.css' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<body class="text-white bg-gray-900">
+
+
+<header class="p-5 flex justify-between items-center">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Logonetflix.png" width="110">
+
+    <nav class="flex space-x-5">
+        <a href="/">Home</a>
+        <a href="/my-list">My List</a>
+    </nav>
+
+    <form action="/search/" method="POST" class="flex space-x-2">
+        {% csrf_token %}
+        <input type="search" name="search_term" placeholder="Search" class="bg-gray-700 p-2 rounded">
+        <button class="bg-red-600 px-4 rounded">Search</button>
+    </form>
+</header>
+
+{% if featured_movie and featured_movie.image_cover %}
+<section
+    class="relative flex items-center px-10"
+    style="
+        background-image: url('{{ featured_movie.image_cover.url }}');
+        background-size: cover;
+        background-position: center;
+        min-height: 80vh;
+    "
+>
+    <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+
+    <div class="relative z-10 max-w-2xl">
+        <h1 class="text-5xl font-bold mb-5">{{ featured_movie.title }}</h1>
+        <p class="mb-5">{{ featured_movie.description }}</p>
+        <a href="/movie/{{ featured_movie.uu_id }}">
+            <button class="bg-red-600 px-6 py-2 rounded">Play</button>
+        </a>
+    </div>
+</section>
+{% endif %}
+
+<section class="py-10 px-5">
+    <h2 class="text-xl mb-5">Popular on Netflix</h2>
+
+    <div class="flex space-x-5 overflow-x-auto">
+        {% for movie in movies %}
+        <div
+            class="w-40 h-64 flex-shrink-0 rounded cursor-pointer"
+            onclick="showModal(this)"
+            data-title="{{ movie.title }}"
+            data-description="{{ movie.description }}"
+            data-release-date="{{ movie.release_date|date:'Y' }}"
+            data-genre="{{ movie.get_genre_display }}"
+            data-length="{{ movie.length }}"
+            data-image-card-url="{{ movie.image_card.url }}"
+            data-image-cover-url="{{ movie.image_cover.url }}"
+            data-video-url="/movie/{{ movie.uu_id }}"
+            style="
+                background-image: url('{{ movie.image_card.url }}');
+                background-size: cover;
+                background-position: center;
+                background-color: #222; ">
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Modal -->
+<div class="modal" id="movieModal">
+    <div class="modal-content">
+        <div class="flex justify-between">
+            <h2 class="text-xl"></h2>
+            <button onclick="hideModal()">X</button>
+        </div>
+        <img class="mb-5 w-full">
+        <p class="mb-5"></p>
+        <a>
+            <button class="bg-red-600 px-4 py-2 rounded">Play</button>
+        </a>
+    </div>
+</div>
+
+<script>
+function showModal(el) {
+    const modal = document.getElementById('movieModal');
+    modal.querySelector('h2').innerText = el.dataset.title;
+    modal.querySelector('img').src = el.dataset.imageCoverUrl;
+    modal.querySelector('p').innerText = el.dataset.description;
+    modal.querySelector('a').href = el.dataset.videoUrl;
+    modal.style.display = 'block';
+}
+function hideModal() {
+    document.getElementById('movieModal').style.display = 'none';
+}
+</script>
+
+</body>
+</html>
